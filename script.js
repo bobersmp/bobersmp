@@ -195,7 +195,7 @@ function initForum() {
         const message = msgInput.value.trim();
 
         if (!nickname || !message) {
-            showToast('<i class="fa-solid fa-triangle-exclamation"></i> Заполните все обязательные поля!', true);
+            showToast('<i class="fa-solid fa-triangle-exclamation"></i> Заполните никнейм и сообщение!', true);
             return;
         }
 
@@ -233,7 +233,6 @@ function initForum() {
             const data = await response.json();
 
             msgInput.value = '';
-            if (titleInput) titleInput.value = '';
 
             launchConfetti();
 
@@ -245,6 +244,7 @@ function initForum() {
             if (currentActiveTopicId) {
                 await openTopicView(currentActiveTopicId);
             } else {
+                if (titleInput) titleInput.value = '';
                 await loadTopics();
             }
 
@@ -561,11 +561,16 @@ function setFormToReplyMode(topicTitle) {
     const formTitle = document.getElementById('form-card-title');
     const catGroup = document.getElementById('category-group');
     const titleGroup = document.getElementById('title-group');
+    const titleInput = document.getElementById('title-input');
     const submitBtn = document.getElementById('submit-btn');
 
     if (formTitle) formTitle.innerHTML = `<i class="fa-solid fa-reply"></i> Ответить в тему`;
     if (catGroup) catGroup.style.display = 'none';
     if (titleGroup) titleGroup.style.display = 'none';
+    if (titleInput) {
+        titleInput.removeAttribute('required');
+        titleInput.value = 'Reply';
+    }
     if (submitBtn) submitBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Отправить ответ`;
 }
 
@@ -573,11 +578,16 @@ function resetFormToCreateTopic() {
     const formTitle = document.getElementById('form-card-title');
     const catGroup = document.getElementById('category-group');
     const titleGroup = document.getElementById('title-group');
+    const titleInput = document.getElementById('title-input');
     const submitBtn = document.getElementById('submit-btn');
 
     if (formTitle) formTitle.innerHTML = `<i class="fa-solid fa-plus"></i> Создать тему`;
     if (catGroup) catGroup.style.display = 'block';
     if (titleGroup) titleGroup.style.display = 'block';
+    if (titleInput) {
+        titleInput.setAttribute('required', 'required');
+        titleInput.value = '';
+    }
     if (submitBtn) submitBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Опубликовать тему`;
 }
 
