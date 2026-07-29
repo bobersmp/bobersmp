@@ -4,8 +4,8 @@
  * ====================================================================
  */
 
-// 🌐 ЗАПУЩЕННЫЙ БЭКЕНД НА ХОСТИНГЕ WISPBYTE
-const RAW_API_URL = 'http://78.154.103.34:14715';
+// 🌐 ЗАПУЩЕННЫЙ БЭКЕНД НА ХОСТИНГЕ WISPBYTE (HTTPS ДОМЕН)
+const RAW_API_URL = 'https://bober.wisp.uno';
 
 let adminPassword = sessionStorage.getItem('bober_admin_pass') || null;
 let currentTopicsData = [];
@@ -20,24 +20,18 @@ const CATEGORY_NAMES = {
 };
 
 /**
- * Безопасный вызов API с защитой от Mixed Content (HTTPS GitHub Pages -> HTTP Wispbyte)
+ * Вызов API с поддержкой HTTPS домена Wispbyte
  */
 async function apiFetch(path, options = {}) {
-    let primaryUrl = `${RAW_API_URL}${path}`;
-    
-    // Если сайт открыт по HTTPS (на GitHub Pages), оборачиваем в бесплатный HTTPS-прокси
-    if (location.protocol === 'https:' && primaryUrl.startsWith('http://')) {
-        primaryUrl = `https://corsproxy.io/?${encodeURIComponent(primaryUrl)}`;
-    }
+    const targetUrl = `${RAW_API_URL}${path}`;
 
     try {
-        const response = await fetch(primaryUrl, options);
+        const response = await fetch(targetUrl, options);
         if (response.ok) return response;
         throw new Error(`HTTP ${response.status}`);
     } catch (err) {
         console.warn('⚠️ Ошибка первичного запроса, пробуем резервный прокси...', err);
-        // Резервный HTTPS прокси
-        const fallbackUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(`${RAW_API_URL}${path}`)}`;
+        const fallbackUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
         return await fetch(fallbackUrl, options);
     }
 }
@@ -367,8 +361,8 @@ async function loadTopics() {
         console.error('Ошибка загрузки тем:', error);
         feed.innerHTML = `
             <div class="feed-placeholder" style="border-color: rgba(255,255,255,0.3); color: var(--text-primary);">
-                <i class="fa-solid fa-triangle-exclamation"></i> Не удалось подключиться к серверу Wispbyte.<br>
-                <small>Нажмите "Добавить домен" в панели Wispbyte или проверьте статус сервера</small>
+                <i class="fa-solid fa-triangle-exclamation"></i> Не удалось подключиться к бэкенду Wispbyte.<br>
+                <small>Убедитесь, что сервер на Wispbyte запущен</small>
             </div>
         `;
     }
