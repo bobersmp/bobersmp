@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Форум Темы и Категории — BOBER SMP</title>
+    <meta name="description" content="Форум категорий и тем Minecraft сервера BOBER SMP.">
+    <link rel="stylesheet" href="style.css">
+    <!-- FontAwesome Free Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- НАВИГАЦИОННАЯ ШАПКА -->
+    <header class="header">
+        <div class="nav-container">
+            <a href="index.html" class="brand-logo">
+                <img src="logo.png" alt="BOBER SMP Logo" class="nav-logo-img">
+            </a>
+
+            <div class="nav-right-controls">
+                <button id="theme-toggle-btn" class="btn-theme-toggle" title="Переключить тему">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+                <button class="mobile-toggle" aria-label="Открыть меню"><i class="fa-solid fa-bars"></i></button>
+            </div>
+
+            <nav>
+                <ul class="nav-menu">
+                    <li><a href="index.html" class="nav-link">Главная</a></li>
+                    <li><a href="rules.html" class="nav-link">Правила</a></li>
+                    <li><a href="forum.html" class="nav-link active">Форум</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- ОСНОВНОЙ КОНТЕНТ -->
+    <main class="main-content">
+        <h1 class="page-title">Форум BOBER SMP</h1>
+        <p class="page-subtitle">Выбирайте интересующую категорию, создавайте новые темы и участвуйте в обсуждениях.</p>
+
+        <div class="forum-layout">
+            
+            <!-- ФОРМА СОЗДАНИЯ ТЕМЫ / ОТВЕТА -->
+            <section id="form-section-container" class="form-card">
+                <h3 id="form-card-title" class="form-title"><i class="fa-solid fa-plus"></i> Создать тему</h3>
+                <form id="forum-form">
+                    
+                    <div class="form-group">
+                        <label for="nickname-input" class="form-label">Ваш Никнейм</label>
+                        <input 
+                            type="text" 
+                            id="nickname-input" 
+                            class="form-input" 
+                            placeholder="Например: Steve_Pro" 
+                            required 
+                            minlength="2" 
+                            maxlength="24"
+                        >
+                    </div>
+
+                    <!-- КАСТОМНЫЙ ДРОПДАУН ВЫБОРА КАТЕГОРИИ С ИКОНКАМИ FONTAWESOME -->
+                    <div id="category-group" class="form-group">
+                        <label class="form-label">Категория темы</label>
+                        <input type="hidden" id="category-select" value="general">
+                        
+                        <div class="custom-dropdown">
+                            <button type="button" id="custom-select-trigger" class="custom-select-trigger">
+                                <span id="selected-cat-label"><i class="fa-solid fa-comments"></i> Общий чат и обсуждения</span>
+                                <i class="fa-solid fa-chevron-down chevron-icon"></i>
+                            </button>
+
+                            <div id="custom-select-options" class="custom-select-options">
+                                <div class="custom-option active" data-val="general">
+                                    <i class="fa-solid fa-comments"></i> Общий чат и обсуждения
+                                </div>
+                                <div class="custom-option" data-val="announcements">
+                                    <i class="fa-solid fa-bullhorn"></i> Объявления и Новости
+                                </div>
+                                <div class="custom-option" data-val="ideas">
+                                    <i class="fa-solid fa-lightbulb"></i> Идеи и Предложения
+                                </div>
+                                <div class="custom-option" data-val="reports">
+                                    <i class="fa-solid fa-shield-halved"></i> Жалобы и Апелляции
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="title-group" class="form-group">
+                        <label for="title-input" class="form-label">Название темы</label>
+                        <input 
+                            type="text" 
+                            id="title-input" 
+                            class="form-input" 
+                            placeholder="О чём ваша тема?" 
+                            required 
+                            minlength="3" 
+                            maxlength="80"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="message-input" class="form-label">Сообщение</label>
+                        <textarea 
+                            id="message-input" 
+                            class="form-textarea" 
+                            placeholder="Текст первого сообщения или ответа..." 
+                            required 
+                            maxlength="1000"
+                        ></textarea>
+                    </div>
+
+                    <button type="submit" id="submit-btn" class="btn-submit"><i class="fa-solid fa-paper-plane"></i> Опубликовать тему</button>
+                </form>
+            </section>
+
+            <!-- ЛЕНТА ТЕМ С ВКЛАДКАМИ КАТЕГОРИЙ И АДМИН-ПАНЕЛЬЮ -->
+            <section class="posts-section">
+
+                <!-- ПАНЕЛЬ АДМИНИСТРАТОРА -->
+                <div class="admin-bar">
+                    <button id="admin-toggle-btn" class="btn-admin-login">
+                        <i class="fa-solid fa-lock"></i> Вход в Админку
+                    </button>
+                    <button id="admin-clear-all-btn" class="btn-clear-all" style="display: none;">
+                        <i class="fa-solid fa-trash-can"></i> Очистить ВСЕ темы
+                    </button>
+                </div>
+
+                <!-- ВКЛАДКИ КАТЕГОРИЙ С ИКОНКАМИ -->
+                <div class="category-tabs">
+                    <button class="tab-btn active" data-cat="all"><i class="fa-solid fa-layer-group"></i> Все темы</button>
+                    <button class="tab-btn" data-cat="announcements"><i class="fa-solid fa-bullhorn"></i> Новости</button>
+                    <button class="tab-btn" data-cat="general"><i class="fa-solid fa-comments"></i> Общий чат</button>
+                    <button class="tab-btn" data-cat="ideas"><i class="fa-solid fa-lightbulb"></i> Идеи</button>
+                    <button class="tab-btn" data-cat="reports"><i class="fa-solid fa-shield-halved"></i> Жалобы</button>
+                </div>
+
+                <!-- ПОИСК ПО ТЕМАМ -->
+                <div class="forum-search-box">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input 
+                        type="text" 
+                        id="forum-search-input" 
+                        class="search-input" 
+                        placeholder="Поиск по названию темы, автору или тексту..."
+                    >
+                </div>
+
+                <!-- КОНТЕЙНЕР ДЛЯ ЛЕНТЫ ТЕМ ИЛИ ДЕТАЛЕЙ ТЕМЫ -->
+                <div id="posts-feed" class="posts-feed">
+                    <div class="feed-placeholder">
+                        <i class="fa-solid fa-spinner fa-spin"></i> Загрузка тем форума...
+                    </div>
+                </div>
+
+            </section>
+
+        </div>
+    </main>
+
+    <!-- МОДАЛЬНОЕ ОКНО АДМИНИСТРАТОРА -->
+    <div id="admin-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-shield-halved"></i> Вход в Админ-панель</h3>
+                <button id="close-modal-btn" class="btn-close-modal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="admin-auth-form">
+                <div class="form-group">
+                    <label for="admin-password" class="form-label">Пароль администратора</label>
+                    <input 
+                        type="password" 
+                        id="admin-password" 
+                        class="form-input" 
+                        placeholder="Введите пароль..." 
+                        required
+                    >
+                </div>
+                <button type="submit" class="btn-submit">Войти</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО 3D-СКИНА -->
+    <div id="skin-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-user-gear"></i> Просмотр Скина</h3>
+                <button id="close-skin-modal-btn" class="btn-close-modal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="skin-modal-body">
+                <h4 id="skin-nick-title" class="skin-nick-title">Player</h4>
+                <img id="skin-render-img" src="" alt="3D Skin Render" class="skin-render-img">
+                <div>
+                    <a id="skin-download-btn" href="#" target="_blank" class="btn-download-skin">
+                        <i class="fa-solid fa-download"></i> Скачать скин
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ПОДВАЛ -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="social-bar">
+                <a href="#" target="_blank" class="social-icon-btn"><i class="fa-brands fa-discord"></i> Discord</a>
+                <a href="#" target="_blank" class="social-icon-btn"><i class="fa-brands fa-telegram"></i> Telegram</a>
+                <a href="#" target="_blank" class="social-icon-btn"><i class="fa-brands fa-vk"></i> ВКонтакте</a>
+            </div>
+            <p>&copy; 2026 BOBER SMP. Все права защищены. Не связан с Mojang AB.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

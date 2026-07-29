@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BOBER SMP — Официальный сайт Minecraft сервера</title>
+    <meta name="description" content="Бесплатный ванильный Minecraft сервер BOBER SMP с разрешённым гриферством и анонимным форумом. Присоединяйся!">
+    <link rel="stylesheet" href="style.css">
+    <!-- FontAwesome Free Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- НАВИГАЦИОННАЯ ШАПКА -->
+    <header class="header">
+        <div class="nav-container">
+            <a href="index.html" class="brand-logo">
+                <img src="logo.png" alt="BOBER SMP Logo" class="nav-logo-img">
+            </a>
+            
+            <div class="nav-right-controls">
+                <button id="theme-toggle-btn" class="btn-theme-toggle" title="Переключить тему">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+                <button class="mobile-toggle" aria-label="Открыть меню"><i class="fa-solid fa-bars"></i></button>
+            </div>
+
+            <nav>
+                <ul class="nav-menu">
+                    <li><a href="index.html" class="nav-link active">Главная</a></li>
+                    <li><a href="rules.html" class="nav-link">Правила</a></li>
+                    <li><a href="forum.html" class="nav-link">Форум</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- ОСНОВНОЙ КОНТЕНТ -->
+    <main class="main-content">
+        
+        <!-- HERO СЕКЦИЯ -->
+        <section class="hero-card">
+            <!-- БОЛЬШОЙ ЛОГОТИП СЕРВЕРА -->
+            <img src="logo.png" alt="BOBER SMP" class="hero-logo-img">
+
+            <p class="hero-description">
+                Современный ванильный сервер Minecraft с ламповым сообществом, разрешённым гриферством и свободным анонимным форумом.
+            </p>
+
+            <!-- Блок копирования IP адреса -->
+            <div class="ip-copy-box" data-ip="">
+                <span class="ip-text"></span>
+                <button class="btn-copy"><i class="fa-regular fa-copy"></i> Скопировать IP</button>
+            </div>
+
+            <!-- Социальные сети -->
+            <div class="social-bar">
+                <a href="#" target="_blank" class="social-icon-btn"><i class="fa-brands fa-discord"></i> Discord</a>
+                <a href="#" target="_blank" class="social-icon-btn"><i class="fa-brands fa-telegram"></i> Telegram</a>
+                <a href="#" target="_blank" class="social-icon-btn"><i class="fa-brands fa-vk"></i> ВКонтакте</a>
+            </div>
+        </section>
+
+        <!-- ПРЕИМУЩЕСТВА СЕРВЕРА -->
+        <section class="grid-cards">
+            <article class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-bolt"></i></div>
+                <h3>Стабильные 20 TPS</h3>
+                <p>Мощный серверный хостинг с высокой частотой процессора гарантирует плавный игровой процесс без лагов.</p>
+            </article>
+
+            <article class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-skull-crossbones"></i></div>
+                <h3>Свобода и Гриферство</h3>
+                <p>Полная свобода выживания: разрешено разрушать незаприваченные постройки, воровать ресурсы и устраивать засады!</p>
+            </article>
+
+            <article class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-comments"></i></div>
+                <h3>Анонимный Форум</h3>
+                <p>Делитесь идеями, задавайте вопросы и общайтесь с сообществом на нашем свободном веб-форуме.</p>
+            </article>
+        </section>
+
+    </main>
+
+    <!-- ПОДВАЛ -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="social-bar">
+                <a href="#" target="_blank" class="social-icon-btn"><i class="fa-brands fa-discord"></i> Discord</a>
+                <a href="#" target="_blank" class="social-icon-btn"><i class="fa-brands fa-telegram"></i> Telegram</a>
+                <a href="#" target="_blank" class="social-icon-btn"><i class="fa-brands fa-vk"></i> ВКонтакте</a>
+            </div>
+            <p>&copy; 2026 BOBER SMP. Все права защищены. Не связан с Mojang AB.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
