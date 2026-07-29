@@ -174,6 +174,24 @@ function initCustomDropdown() {
     });
 }
 
+/**
+ * Автоматическая синхронизация выбранной вкладки с выпадающим списком слева
+ */
+function syncCategoryDropdownWithTab(catVal) {
+    if (!catVal || catVal === 'all') return;
+    const hiddenInput = document.getElementById('category-select');
+    const label = document.getElementById('selected-cat-label');
+    const options = document.querySelectorAll('.custom-option');
+
+    const targetOpt = Array.from(options).find(o => o.dataset.val === catVal);
+    if (targetOpt && hiddenInput && label) {
+        options.forEach(o => o.classList.remove('active'));
+        targetOpt.classList.add('active');
+        hiddenInput.value = catVal;
+        label.innerHTML = targetOpt.innerHTML;
+    }
+}
+
 /* ==========================================
    6. ЛОГИКА ФОРУМА И ЭФФЕКТ КОНФЕТТИ
    ========================================== */
@@ -336,6 +354,9 @@ function initCategoryTabs() {
             btn.classList.add('active');
             selectedCategory = btn.dataset.cat;
             
+            // Автоматически синхронизируем выпадающий список в форме слева
+            syncCategoryDropdownWithTab(selectedCategory);
+
             if (currentActiveTopicId) {
                 resetFormToCreateTopic();
             }
@@ -589,6 +610,11 @@ function resetFormToCreateTopic() {
         titleInput.value = '';
     }
     if (submitBtn) submitBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Опубликовать тему`;
+
+    // Синхронизируем выпадающее меню со сквозной выбранной вкладкой
+    if (selectedCategory && selectedCategory !== 'all') {
+        syncCategoryDropdownWithTab(selectedCategory);
+    }
 }
 
 function initSearchFilter() {
