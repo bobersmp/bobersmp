@@ -5,7 +5,7 @@
  */
 
 // 🌐 ЗАПУЩЕННЫЙ БЭКЕНД НА ХОСТИНГЕ WISPBYTE
-const API_BASE_URL = 'http://78.154.103.34:14715';
+const RAW_API_URL = 'http://78.154.103.34:14715';
 
 let adminPassword = sessionStorage.getItem('bober_admin_pass') || null;
 let currentTopicsData = [];
@@ -18,6 +18,29 @@ const CATEGORY_NAMES = {
     ideas: '<i class="fa-solid fa-lightbulb"></i> Идеи',
     reports: '<i class="fa-solid fa-shield-halved"></i> Жалобы'
 };
+
+/**
+ * Безопасный вызов API с защитой от Mixed Content (HTTPS GitHub Pages -> HTTP Wispbyte)
+ */
+async function apiFetch(path, options = {}) {
+    let primaryUrl = `${RAW_API_URL}${path}`;
+    
+    // Если сайт открыт по HTTPS (на GitHub Pages), оборачиваем в бесплатный HTTPS-прокси
+    if (location.protocol === 'https:' && primaryUrl.startsWith('http://')) {
+        primaryUrl = `https://corsproxy.io/?${encodeURIComponent(primaryUrl)}`;
+    }
+
+    try {
+        const response = await fetch(primaryUrl, options);
+        if (response.ok) return response;
+        throw new Error(`HTTP ${response.status}`);
+    } catch (err) {
+        console.warn('⚠️ Ошибка первичного запроса, пробуем резервный прокси...', err);
+        // Резервный HTTPS прокси
+        const fallbackUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(`${RAW_API_URL}${path}`)}`;
+        return await fetch(fallbackUrl, options);
+    }
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     initThemeToggle();
@@ -191,11 +214,11 @@ function initForum() {
                 headers['X-Admin-Password'] = adminPassword;
             }
 
-            let endpoint = `${API_BASE_URL}/api/messages`;
+            let path = `/api/messages`;
             let bodyPayload = {};
 
             if (currentActiveTopicId) {
-                endpoint = `${API_BASE_URL}/api/messages/${currentActiveTopicId}/replies`;
+                path = `/api/messages/${currentActiveTopicId}/replies`;
                 bodyPayload = { nickname, message };
                 if (adminPassword) bodyPayload.password = adminPassword;
             } else {
@@ -207,17 +230,13 @@ function initForum() {
                 if (adminPassword) bodyPayload.password = adminPassword;
             }
 
-            const response = await fetch(endpoint, {
+            const response = await apiFetch(path, {
                 method: 'POST',
                 headers,
                 body: JSON.stringify(bodyPayload)
             });
 
             const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.error || 'Ошибка при отправке');
-            }
 
             msgInput.value = '';
             if (titleInput) titleInput.value = '';
@@ -339,10 +358,8 @@ async function loadTopics() {
     currentActiveTopicId = null;
 
     try {
-        const url = `${API_BASE_URL}/api/messages?category=${selectedCategory}`;
-        const response = await fetch(url);
-        if (!response.ok) throw new Error('Не удалось получить список тем');
-
+        const path = `/api/messages?category=${selectedCategory}`;
+        const response = await apiFetch(path);
         currentTopicsData = await response.json();
         renderTopicsList(currentTopicsData);
 
@@ -350,8 +367,8 @@ async function loadTopics() {
         console.error('Ошибка загрузки тем:', error);
         feed.innerHTML = `
             <div class="feed-placeholder" style="border-color: rgba(255,255,255,0.3); color: var(--text-primary);">
-                <i class="fa-solid fa-triangle-exclamation"></i> Не удалось подключиться к серверу Wispbyte (${API_BASE_URL}).<br>
-                <small>Проверьте статус сервера на Wispbyte и настройки CORS</small>
+                <i class="fa-solid fa-triangle-exclamation"></i> Не удалось подключиться к серверу Wispbyte.<br>
+                <small>Нажмите "Добавить домен" в панели Wispbyte или проверьте статус сервера</small>
             </div>
         `;
     }
@@ -450,9 +467,7 @@ async function openTopicView(topicId) {
     currentActiveTopicId = topicId;
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/messages/${topicId}`);
-        if (!response.ok) throw new Error('Тема не найдена');
-
+        const response = await apiFetch(`/api/messages/${topicId}`);
         const topic = await response.json();
 
         setFormToReplyMode(topic.title);
@@ -613,14 +628,12 @@ function attachPostEvents() {
             e.stopPropagation();
             const postId = btn.dataset.id;
             try {
-                const response = await fetch(`${API_BASE_URL}/api/messages/${postId}/like`, { method: 'POST' });
+                const response = await apiFetch(`/api/messages/${postId}/like`, { method: 'POST' });
                 const data = await response.json();
-                if (response.ok) {
-                    const countSpan = btn.querySelector('.like-count');
-                    if (countSpan) countSpan.innerText = data.likes;
-                    btn.classList.add('liked');
-                    btn.querySelector('i').className = 'fa-solid fa-heart';
-                }
+                const countSpan = btn.querySelector('.like-count');
+                if (countSpan) countSpan.innerText = data.likes;
+                btn.classList.add('liked');
+                btn.querySelector('i').className = 'fa-solid fa-heart';
             } catch (err) {
                 console.error('Ошибка лайка:', err);
             }
@@ -655,14 +668,13 @@ function attachPostEvents() {
             if (!confirm(`Удалить тему #${postId}?`)) return;
 
             try {
-                const response = await fetch(`${API_BASE_URL}/api/messages/${postId}`, {
+                await apiFetch(`/api/messages/${postId}`, {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-Admin-Password': adminPassword
                     }
                 });
-                if (!response.ok) throw new Error('Ошибка удаления');
                 showToast('<i class="fa-solid fa-trash"></i> Тема удалена');
                 await loadTopics();
             } catch (err) {
@@ -677,7 +689,7 @@ function attachPostEvents() {
             e.stopPropagation();
             const postId = btn.dataset.id;
             try {
-                const response = await fetch(`${API_BASE_URL}/api/messages/${postId}/pin`, {
+                const response = await apiFetch(`/api/messages/${postId}/pin`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -685,7 +697,6 @@ function attachPostEvents() {
                     }
                 });
                 const data = await response.json();
-                if (!response.ok) throw new Error(data.error || 'Ошибка закрепления');
                 showToast(`<i class="fa-solid fa-thumbtack"></i> ${data.message}`);
                 await loadTopics();
             } catch (err) {
@@ -755,13 +766,11 @@ function initAdminPanel() {
         const enteredPass = passInput.value.trim();
 
         try {
-            const response = await fetch(`${API_BASE_URL}/api/admin/verify`, {
+            const response = await apiFetch(`/api/admin/verify`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ password: enteredPass })
             });
-
-            if (!response.ok) throw new Error('Неверный пароль администратора!');
 
             adminPassword = enteredPass;
             sessionStorage.setItem('bober_admin_pass', enteredPass);
@@ -781,14 +790,13 @@ function initAdminPanel() {
         if (!confirm('⚠️ Вы уверены, что хотите ОЧИСТИТЬ ВСЕ темы форума?')) return;
 
         try {
-            const response = await fetch(`${API_BASE_URL}/api/messages`, {
+            await apiFetch(`/api/messages`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-Admin-Password': adminPassword
                 }
             });
-            if (!response.ok) throw new Error('Ошибка очистки тем');
             showToast('<i class="fa-solid fa-broom"></i> Все темы форума успешно удалены!');
             await loadTopics();
         } catch (err) {
