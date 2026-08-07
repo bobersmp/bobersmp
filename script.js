@@ -20,20 +20,29 @@ const CATEGORY_NAMES = {
 };
 
 /**
- * Вызов API с поддержкой HTTPS домена Wispbyte
+ * Безопасный вызов API с жестким сбросом при ошибках авторизации (401 / 403)
  */
 async function apiFetch(path, options = {}) {
     const targetUrl = `${RAW_API_URL}${path}`;
 
+    let response;
     try {
-        const response = await fetch(targetUrl, options);
-        if (response.ok) return response;
-        throw new Error(`HTTP ${response.status}`);
+        response = await fetch(targetUrl, options);
     } catch (err) {
-        console.warn('⚠️ Ошибка первичного запроса, пробуем резервный прокси...', err);
+        console.warn('⚠️ Ошибка прямого соединения, используем прокси...', err);
         const fallbackUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
-        return await fetch(fallbackUrl, options);
+        response = await fetch(fallbackUrl, options);
     }
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMsg = errorData.error || `Ошибка доступа (Код ${response.status})`;
+        const err = new Error(errorMsg);
+        err.status = response.status;
+        throw err;
+    }
+
+    return response;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -174,9 +183,6 @@ function initCustomDropdown() {
     });
 }
 
-/**
- * Автоматическая синхронизация выбранной вкладки с выпадающим списком слева
- */
 function syncCategoryDropdownWithTab(catVal) {
     if (!catVal || catVal === 'all') return;
     const hiddenInput = document.getElementById('category-select');
@@ -248,7 +254,7 @@ function initForum() {
                 body: JSON.stringify(bodyPayload)
             });
 
-            const data = await response.json();
+            await response.json();
 
             msgInput.value = '';
 
@@ -354,7 +360,6 @@ function initCategoryTabs() {
             btn.classList.add('active');
             selectedCategory = btn.dataset.cat;
             
-            // Автоматически синхронизируем выпадающий список в форме слева
             syncCategoryDropdownWithTab(selectedCategory);
 
             if (currentActiveTopicId) {
@@ -611,7 +616,6 @@ function resetFormToCreateTopic() {
     }
     if (submitBtn) submitBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Опубликовать тему`;
 
-    // Синхронизируем выпадающее меню со сквозной выбранной вкладкой
     if (selectedCategory && selectedCategory !== 'all') {
         syncCategoryDropdownWithTab(selectedCategory);
     }
@@ -801,6 +805,12 @@ function initAdminPanel() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ password: enteredPass })
             });
+
+            const data = await response.json();
+
+            if (data.status !== 'ok') {
+                throw new Error(data.error || 'Неверный пароль администратора!');
+            }
 
             adminPassword = enteredPass;
             sessionStorage.setItem('bober_admin_pass', enteredPass);
